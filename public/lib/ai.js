@@ -139,20 +139,132 @@
    * @param {string} searchBase  本地服务地址
    * @param {object} [opts] { provider, key } —— 想用商业 API 时传，不传就是免费内置
    */
+  /* ------------------------------------------------------------------ */
+  /* 浏览器直连检索（页面托管在公网、本地服务不可用时走这条）             */
+  /* ------------------------------------------------------------------ */
+
+  /**
+   * 只有自己支持 CORS 的搜索 API 才能浏览器直连。实测：
+   *   Tavily  access-control-allow-origin: *
+   *   Serper  access-control-allow-origin: *
+   *   Exa     CORS 头完整
+   *   Brave   405，不支持 → 不在列表里
+   * 360 / 必应这种抓网页的完全不行，必须靠服务端。
+   */
+  const DIRECT = {
+    tavily: async (query, key, limit) => {
+      const res = await fetch('https://api.tavily.com/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + key },
+        body: JSON.stringify({
+          query,
+          max_results: Math.min(limit, 20),
+          search_depth: 'basic',
+          include_answer: false
+        }),
+        signal: AbortSignal.timeout ? AbortSignal.timeout(20000) : undefined
+      });
+      if (!res.ok) throw new Error('Tavily HTTP ' + res.status);
+      const d = await res.json();
+      return (d.results || []).map((r) => ({ title: r.title || '', url: r.url || '', snippet: r.content || '' }));
+    },
+
+    serper: async (query, key, limit) => {
+      const res = await fetch('https://google.serper.dev/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-API-KEY': key },
+        body: JSON.stringify({ q: query, num: Math.min(limit, 10) }),
+        signal: AbortSignal.timeout ? AbortSignal.timeout(20000) : undefined
+      });
+      if (!res.ok) throw new Error('Serper HTTP ' + res.status);
+      const d = await res.json();
+      return (d.organic || []).map((r) => ({ title: r.title || '', url: r.link || '', snippet: r.snippet || '' }));
+    },
+
+    exa: async (query, key, limit) => {
+      const res = await fetch('https://api.exa.ai/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': key },
+        body: JSON.stringify({ query, numResults: Math.min(limit, 10), contents: { text: { maxCharacters: 1000 } } }),
+        signal: AbortSignal.timeout ? AbortSignal.timeout(20000) : undefined
+      });
+      if (!res.ok) throw new Error('Exa HTTP ' + res.status);
+      const d = await res.json();
+      return (d.results || []).map((r) => ({ title: r.title || '', url: r.url || '', snippet: r.text || '' }));
+    }
+  };
+
+  async function directSearch(query, provider, key, limit) {
+    const errors = [];
+    const tried = [];
+
+    const order = [];
+    const want = String(provider || 'auto').toLowerCase();
+    if (want !== 'auto' && DIRECT[want] && key) order.push(want);
+    // 兜底：用户可能只填了 key 但没切 provider，或首选源挂了
+    for (const name of Object.keys(DIRECT)) {
+      if (!order.includes(name) && key && want === 'auto') order.push(name);
+    }
+
+    if (order.length === 0) {
+      return {
+        results: [],
+        provider: 'none',
+        tried,
+        errors: ['本地服务不可用，且没有可直连的搜索 Key（请到设置里填 Tavily / Serper / Exa 的 Key）']
+      };
+    }
+
+    for (const name of order) {
+      tried.push(name);
+      try {
+        const results = await DIRECT[name](query, key, limit);
+        if (results && results.length) return { results, provider: name + '（直连）', tried, errors };
+        errors.push(name + '：没有返回结果');
+      } catch (err) {
+        errors.push(name + '：' + (err && err.message ? err.message : String(err)));
+      }
+    }
+    return { results: [], provider: 'none', tried, errors };
+  }
+
+  /**
+   * 检索入口：先问本地服务（它能用免费源），服务不可用就浏览器直连。
+   * 页面托管在 GitHub Pages 时，本地服务本来就不存在，直接走直连。
+   */
   async function search(query, searchBase, opts) {
     const o = opts || {};
-    const base = String(searchBase || 'http://localhost:3000').replace(/\/+$/, '');
+    const limit = Math.max(1, Math.min(20, Number(o.limit) || 8));
+    const errors = [];
 
-    const headers = {};
-    if (o.provider && o.provider !== 'auto') headers['X-Search-Provider'] = o.provider;
-    if (o.key) headers['X-Search-Key'] = o.key;
+    // 1. 本地服务
+    const base = String(searchBase || '').replace(/\/+$/, '');
+    if (base) {
+      const headers = {};
+      if (o.provider && o.provider !== 'auto') headers['X-Search-Provider'] = o.provider;
+      if (o.key) headers['X-Search-Key'] = o.key;
+      try {
+        const res = await fetch(base + '/api/search?q=' + encodeURIComponent(query), {
+          headers,
+          signal: AbortSignal.timeout ? AbortSignal.timeout(12000) : undefined
+        });
+        if (res.ok) {
+          const out = await res.json();
+          if (out && out.results && out.results.length) return out;
+          if (out && out.errors) errors.push(...out.errors);
+        } else {
+          errors.push('本地服务 HTTP ' + res.status);
+        }
+      } catch (err) {
+        // 托管在公网时这一步必然失败（没有本地服务），静默转直连
+        errors.push('本地服务不可用');
+      }
+    }
 
-    const res = await fetch(base + '/api/search?q=' + encodeURIComponent(query), {
-      headers,
-      signal: AbortSignal.timeout ? AbortSignal.timeout(40000) : undefined
-    });
-    if (!res.ok) throw new Error('搜索服务返回 HTTP ' + res.status);
-    return res.json();
+    // 2. 浏览器直连
+    const direct = await directSearch(query, o.provider, o.key, limit);
+    direct.errors = errors.concat(direct.errors);
+    return direct;
   }
 
   /** 拉取服务端支持的搜索源列表（服务没起时返回 null，界面用内置兜底） */

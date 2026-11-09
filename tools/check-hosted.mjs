@@ -9,6 +9,7 @@ const { chromium } = require('playwright-core');
 
 const EDGE = 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe';
 const BASE = (process.argv[2] || '').replace(/\/+$/, '');
+const PAGE = process.argv[3] || '/taskpane';
 if (!BASE) { console.error('用法: node tools/check-hosted.mjs <baseUrl>'); process.exit(1); }
 
 let pass = 0; let fail = 0;
@@ -25,7 +26,7 @@ page.on('pageerror', (e) => errors.push(e.message));
 page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
 page.on('requestfailed', (r) => requested.push(r.url() + ' :: ' + (r.failure() || {}).errorText));
 
-await page.goto(BASE + '/taskpane.html', { waitUntil: 'domcontentloaded', timeout: 40000 });
+await page.goto(BASE + PAGE, { waitUntil: 'domcontentloaded', timeout: 40000 });
 await page.waitForTimeout(2500);
 
 const st = await page.evaluate(() => ({

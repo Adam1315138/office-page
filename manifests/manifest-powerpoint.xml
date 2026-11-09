@@ -7,7 +7,7 @@
   xsi:type="TaskPaneApp">
 
   <Id>a5c3e4d6-7f8a-4b9c-9d0e-3f4a5b6c7d8e</Id>
-  <Version>1.2.0.0</Version>
+  <Version>1.2.1.0</Version>
   <ProviderName>Office Copilot</ProviderName>
   <DefaultLocale>zh-CN</DefaultLocale>
   <DisplayName DefaultValue="Office Copilot"/>
@@ -27,7 +27,7 @@
   </Requirements>
 
   <DefaultSettings>
-    <SourceLocation DefaultValue="https://office-page-4b5.pages.dev/taskpane.html"/>
+    <SourceLocation DefaultValue="https://office-page-4b5.pages.dev/taskpane"/>
   </DefaultSettings>
 
   <Permissions>ReadWriteDocument</Permissions>
@@ -75,8 +75,8 @@
         <bt:Image id="Icon.80" DefaultValue="https://office-page-4b5.pages.dev/icon-80.png"/>
       </bt:Images>
       <bt:Urls>
-        <bt:Url id="Commands.Url" DefaultValue="https://office-page-4b5.pages.dev/taskpane.html"/>
-        <bt:Url id="Pane.Url" DefaultValue="https://office-page-4b5.pages.dev/taskpane.html"/>
+        <bt:Url id="Commands.Url" DefaultValue="https://office-page-4b5.pages.dev/taskpane"/>
+        <bt:Url id="Pane.Url" DefaultValue="https://office-page-4b5.pages.dev/taskpane"/>
       </bt:Urls>
       <bt:ShortStrings>
         <bt:String id="OcGroup.Label" DefaultValue="智能助手"/>

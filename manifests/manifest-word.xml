@@ -7,14 +7,14 @@
   xsi:type="TaskPaneApp">
 
   <Id>8f3a1c2e-4b5d-4e6f-9a7b-1c2d3e4f5a6b</Id>
-  <Version>1.2.1.0</Version>
+  <Version>1.2.2.0</Version>
   <ProviderName>Office Copilot</ProviderName>
   <DefaultLocale>zh-CN</DefaultLocale>
   <DisplayName DefaultValue="Office Copilot"/>
   <Description DefaultValue="中文 AI 文档助手：选中文字直接改写，支持联网检索"/>
-  <IconUrl DefaultValue="https://office-page-4b5.pages.dev/icon-32.png"/>
-  <HighResolutionIconUrl DefaultValue="https://office-page-4b5.pages.dev/icon-64.png"/>
-  <SupportUrl DefaultValue="https://office-page-4b5.pages.dev/"/>
+  <IconUrl DefaultValue="http://localhost:3000/icon-32.png"/>
+  <HighResolutionIconUrl DefaultValue="http://localhost:3000/icon-64.png"/>
+  <SupportUrl DefaultValue="http://localhost:3000/"/>
 
   <Hosts>
     <Host Name="Document"/>
@@ -27,7 +27,7 @@
   </Requirements>
 
   <DefaultSettings>
-    <SourceLocation DefaultValue="https://office-page-4b5.pages.dev/taskpane"/>
+    <SourceLocation DefaultValue="http://localhost:3000/taskpane.html"/>
   </DefaultSettings>
 
   <Permissions>ReadWriteDocument</Permissions>
@@ -70,13 +70,13 @@
     </Hosts>
     <Resources>
       <bt:Images>
-        <bt:Image id="Icon.16" DefaultValue="https://office-page-4b5.pages.dev/icon-16.png"/>
-        <bt:Image id="Icon.32" DefaultValue="https://office-page-4b5.pages.dev/icon-32.png"/>
-        <bt:Image id="Icon.80" DefaultValue="https://office-page-4b5.pages.dev/icon-80.png"/>
+        <bt:Image id="Icon.16" DefaultValue="http://localhost:3000/icon-16.png"/>
+        <bt:Image id="Icon.32" DefaultValue="http://localhost:3000/icon-32.png"/>
+        <bt:Image id="Icon.80" DefaultValue="http://localhost:3000/icon-80.png"/>
       </bt:Images>
       <bt:Urls>
-        <bt:Url id="Commands.Url" DefaultValue="https://office-page-4b5.pages.dev/taskpane"/>
-        <bt:Url id="Pane.Url" DefaultValue="https://office-page-4b5.pages.dev/taskpane"/>
+        <bt:Url id="Commands.Url" DefaultValue="http://localhost:3000/taskpane.html"/>
+        <bt:Url id="Pane.Url" DefaultValue="http://localhost:3000/taskpane.html"/>
       </bt:Urls>
       <bt:ShortStrings>
         <bt:String id="OcGroup.Label" DefaultValue="智能助手"/>

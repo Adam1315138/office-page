@@ -42,6 +42,8 @@ const SHARE_CANDIDATES = resolveShareDir();
 
 const KNOWN_BASES = [
   'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'https://office-page-4b5.pages.dev',
   'https://adam1315138.github.io/office-page',
 ];
 

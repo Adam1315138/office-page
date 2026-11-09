@@ -1,0 +1,5 @@
+# 让 /taskpane.html 直接返回 200，而不是 308 跳到 /taskpane
+# 原因：Office 加载项要求 SourceLocation 以 .html 结尾，但 Cloudflare Pages
+# 默认开启「美化 URL」，会把 .html 永久重定向到无扩展名地址；
+# Office 的加载器不跟随重定向，于是报「无法加载该加载项」。
+/taskpane.html  /taskpane  200

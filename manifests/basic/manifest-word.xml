@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<OfficeApp
+  xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
+  xsi:type="TaskPaneApp">
+
+  <Id>8f3a1c2e-4b5d-4e6f-9a7b-1c2d3e4f5a6b</Id>
+  <Version>1.0.0.0</Version>
+  <ProviderName>Office Copilot</ProviderName>
+  <DefaultLocale>zh-CN</DefaultLocale>
+  <DisplayName DefaultValue="Office Copilot"/>
+  <Description DefaultValue="中文 AI 文档助手：选中文字直接改写，支持联网检索"/>
+  <IconUrl DefaultValue="http://localhost:3000/icon-32.png"/>
+  <HighResolutionIconUrl DefaultValue="http://localhost:3000/icon-64.png"/>
+  <SupportUrl DefaultValue="http://localhost:3000/"/>
+
+  <Hosts>
+    <Host Name="Document"/>
+  </Hosts>
+
+  <Requirements>
+    <Sets DefaultMinVersion="1.1">
+      <Set Name="WordApi" MinVersion="1.1"/>
+    </Sets>
+  </Requirements>
+
+  <DefaultSettings>
+    <SourceLocation DefaultValue="http://localhost:3000/taskpane.html"/>
+  </DefaultSettings>
+
+  <Permissions>ReadWriteDocument</Permissions>
+
+</OfficeApp>

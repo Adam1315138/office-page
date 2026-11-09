@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<OfficeApp
+  xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
+  xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides"
+  xsi:type="TaskPaneApp">
+
+  <Id>9a4b2d3f-5c6e-4f7a-8b9c-2d3e4f5a6b7c</Id>
+  <Version>1.1.0.0</Version>
+  <ProviderName>Office Copilot</ProviderName>
+  <DefaultLocale>zh-CN</DefaultLocale>
+  <DisplayName DefaultValue="Office Copilot"/>
+  <Description DefaultValue="中文 AI 文档助手：选中文字直接改写，支持联网检索"/>
+  <IconUrl DefaultValue="http://localhost:3000/icon-32.png"/>
+  <HighResolutionIconUrl DefaultValue="http://localhost:3000/icon-64.png"/>
+  <SupportUrl DefaultValue="http://localhost:3000/"/>
+
+  <Hosts>
+    <Host Name="Workbook"/>
+  </Hosts>
+
+  <Requirements>
+    <Sets DefaultMinVersion="1.1">
+      <Set Name="ExcelApi" MinVersion="1.1"/>
+    </Sets>
+  </Requirements>
+
+  <DefaultSettings>
+    <SourceLocation DefaultValue="http://localhost:3000/taskpane.html"/>
+  </DefaultSettings>
+
+  <Permissions>ReadWriteDocument</Permissions>
+
+  <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="VersionOverridesV1_0">
+    <Hosts>
+      <Host xsi:type="Workbook">
+        <DesktopFormFactor>
+          <FunctionFile resid="Commands.Url"/>
+          <ExtensionPoint xsi:type="PrimaryCommandSurface">
+            <OfficeTab id="TabHome">
+              <Group id="OcGroup">
+                <Label resid="OcGroup.Label"/>
+                <Icon>
+                  <bt:Image size="16" resid="Icon.16"/>
+                  <bt:Image size="32" resid="Icon.32"/>
+                  <bt:Image size="80" resid="Icon.80"/>
+                </Icon>
+                <Control xsi:type="Button" id="OcBtn">
+                  <Label resid="OcBtn.Label"/>
+                  <Supertip>
+                    <Title resid="OcBtn.Label"/>
+                    <Description resid="OcBtn.Tip"/>
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Icon.16"/>
+                    <bt:Image size="32" resid="Icon.32"/>
+                    <bt:Image size="80" resid="Icon.80"/>
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <TaskpaneId>OfficeCopilotPaneExcel</TaskpaneId>
+                    <SourceLocation resid="Pane.Url"/>
+                  </Action>
+                </Control>
+              </Group>
+            </OfficeTab>
+          </ExtensionPoint>
+        </DesktopFormFactor>
+      </Host>
+    </Hosts>
+    <Resources>
+      <bt:Images>
+        <bt:Image id="Icon.16" DefaultValue="http://localhost:3000/icon-16.png"/>
+        <bt:Image id="Icon.32" DefaultValue="http://localhost:3000/icon-32.png"/>
+        <bt:Image id="Icon.80" DefaultValue="http://localhost:3000/icon-80.png"/>
+      </bt:Images>
+      <bt:Urls>
+        <bt:Url id="Commands.Url" DefaultValue="http://localhost:3000/taskpane.html"/>
+        <bt:Url id="Pane.Url" DefaultValue="http://localhost:3000/taskpane.html"/>
+      </bt:Urls>
+      <bt:ShortStrings>
+        <bt:String id="OcGroup.Label" DefaultValue="智能助手"/>
+        <bt:String id="OcBtn.Label" DefaultValue="Office Copilot"/>
+      </bt:ShortStrings>
+      <bt:LongStrings>
+        <bt:String id="OcBtn.Tip" DefaultValue="选中文字后让 AI 改写，或就当前文档提问"/>
+      </bt:LongStrings>
+    </Resources>
+  </VersionOverrides>
+
+</OfficeApp>

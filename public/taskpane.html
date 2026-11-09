@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Office Copilot</title>
+  <link rel="icon" href="icon-32.png">
+  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+  <link rel="stylesheet" href="taskpane.css">
+</head>
+
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="dot" id="status-dot"></span>
+        <span class="brand-name">Office Copilot</span>
+        <span class="host-tag" id="host-tag">加载中</span>
+      </div>
+      <div class="top-actions">
+        <button class="icon-btn" id="btn-clear" title="清空对话">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>
+        </button>
+        <button class="icon-btn" id="btn-settings" title="设置">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="selbar" id="selbar">
+      <span class="sel-text" id="sel-text">未选中内容</span>
+      <button class="mini-btn" id="btn-read-sel">重新读取选区</button>
+    </div>
+
+    <main class="messages" id="messages">
+      <div class="empty" id="empty">
+        <div class="empty-icon">◈</div>
+        <p class="empty-title">选中文字，告诉我要怎么改</p>
+        <p class="empty-sub">在文档里框选一段，然后在下面输入指令，比如「改得更正式」「翻成英文」「压缩到 100 字」。</p>
+        <div class="quick-grid" id="quick-grid">
+          <button class="quick" data-act="polish">润色文字</button>
+          <button class="quick" data-act="formal">改得更正式</button>
+          <button class="quick" data-act="shorten">压缩精简</button>
+          <button class="quick" data-act="expand">扩写补充</button>
+          <button class="quick" data-act="translate">翻译成英文</button>
+          <button class="quick" data-act="outline">总结全文大纲</button>
+        </div>
+      </div>
+    </main>
+
+    <footer class="composer-wrap">
+      <div class="context-row">
+        <label class="chip" id="chip-sel">
+          <input type="checkbox" id="use-selection" checked>
+          <span>带上选区</span>
+        </label>
+        <label class="chip" id="chip-doc">
+          <input type="checkbox" id="use-document">
+          <span>带上全文</span>
+        </label>
+        <label class="chip" id="chip-search">
+          <input type="checkbox" id="allow-search">
+          <span>允许联网</span>
+        </label>
+        <span class="hint" id="hint">就绪</span>
+      </div>
+      <div class="composer">
+        <textarea id="input" rows="2" placeholder="告诉我要怎么改这段文字…（Enter 发送，Shift+Enter 换行）"></textarea>
+        <button class="send-btn" id="btn-send" title="发送" disabled>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+        </button>
+      </div>
+    </footer>
+  </div>
+
+  <!-- 设置抽屉 -->
+  <div class="drawer-mask" id="drawer-mask" hidden></div>
+  <aside class="drawer" id="drawer" hidden>
+    <div class="drawer-head">
+      <h2>设置</h2>
+      <button class="icon-btn" id="btn-close-drawer">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="drawer-body">
+      <div class="group">
+        <div class="group-title">模型</div>
+        <label class="field">
+          <span class="label">Base URL</span>
+          <input type="text" id="set-baseurl" placeholder="https://api.deepseek.com/v1">
+        </label>
+        <label class="field">
+          <span class="label">模型名</span>
+          <input type="text" id="set-model" list="model-list" placeholder="deepseek-v4-flash">
+          <datalist id="model-list">
+            <option value="deepseek-v4-flash"></option>
+            <option value="deepseek-v4-pro"></option>
+          </datalist>
+        </label>
+        <label class="field">
+          <span class="label">API Key</span>
+          <input type="password" id="set-apikey" placeholder="sk-...">
+          <span class="hint">只存在本机浏览器存储里，只发给上面那个地址</span>
+        </label>
+        <label class="check-row">
+          <input type="checkbox" id="set-useproxy">
+          <span>请求经本地服务转发 —— 模型 API 不支持跨域时勾这个（就不用自建 CORS 代理了）</span>
+        </label>
+      </div>
+
+      <div class="group">
+        <div class="group-title">联网搜索</div>
+        <label class="field">
+          <span class="label">搜索源</span>
+          <select id="set-searchprovider">
+            <option value="auto">自动（免费内置，无需 Key）</option>
+          </select>
+          <span class="hint" id="provider-hint">默认服务端抓必应，失败自动换 DuckDuckGo</span>
+        </label>
+        <label class="field" id="search-key-field" hidden>
+          <span class="label">搜索 API Key</span>
+          <input type="password" id="set-searchkey" placeholder="填对应服务的 key">
+          <span class="hint" id="search-key-hint"></span>
+        </label>
+        <label class="field">
+          <span class="label">搜索服务地址</span>
+          <input type="text" id="set-searchbase" placeholder="http://localhost:3000">
+          <span class="hint">本地服务默认 localhost:3000，不用改</span>
+        </label>
+        <button class="ghost-btn" id="btn-check-providers">测试各搜索源连通性（约 10 秒）</button>
+        <div class="provider-status" id="provider-status" hidden></div>
+      </div>
+
+      <div class="group">
+        <div class="group-title">行为</div>
+        <label class="check-row">
+          <input type="checkbox" id="set-preview" checked>
+          <span>改文档前先预览（推荐）—— 先看改前改后，点"应用"才写入</span>
+        </label>
+        <label class="check-row">
+          <input type="checkbox" id="set-stream" checked>
+          <span>流式输出（逐字显示）</span>
+        </label>
+        <label class="field">
+          <span class="label">全文最多带多少字</span>
+          <input type="text" id="set-maxchars" placeholder="20000">
+        </label>
+      </div>
+
+      <div class="group">
+        <div class="group-title">自定义</div>
+        <label class="field">
+          <span class="label">系统提示词（留空用内置）</span>
+          <textarea id="set-prompt" rows="4" placeholder="留空使用内置提示词"></textarea>
+        </label>
+      </div>
+
+      <div class="drawer-foot">
+        <button class="primary-btn" id="btn-save">保存</button>
+      </div>
+      <p class="foot-note" id="foot-note">Office Copilot · 本地运行，不经过任何中转</p>
+    </div>
+  </aside>
+
+  <script src="lib/markdown.js"></script>
+  <script src="lib/office-api.js"></script>
+  <script src="lib/ai.js"></script>
+  <script src="taskpane.js"></script>
+</body>
+
+</html>

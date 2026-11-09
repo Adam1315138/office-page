@@ -1,0 +1,21 @@
+# 第三方工具与安装包（体积大，从官网自行下载）
+tools/otp/
+tools/sara-office-removal/
+*.zip
+
+# 构建产物
+dist/
+
+# 本地临时文件
+*.tmp
+*.log
+
+# 系统垃圾
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# 本地配置 / 可能含密钥
+*.local.json
+.env
+.env.*

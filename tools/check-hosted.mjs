@@ -58,13 +58,16 @@ const direct = await page.evaluate(async () => {
 check(direct.ok, 'search() 在无本地服务时能返回（不抛异常）', direct.error || '');
 if (direct.ok) {
   const joined = (direct.errors || []).join(' ');
-  check(/本地服务不可用/.test(joined), '记录了本地服务不可用的降级原因');
+  // 公网托管时不该再出现"本地服务不可用"——那说明还在白戳 localhost
+  check(!/本地服务不可用/.test(joined), '公网版不再尝试 localhost（直接走直连）');
   check(/tavily/i.test(joined) || direct.provider.indexOf('tavily') === 0,
     '确实尝试了直连 Tavily（' + (direct.provider || '无') + '）');
   check(/401|403|HTTP/i.test(joined) || direct.count >= 0, 'Tavily 用了假 key，返回鉴权错误符合预期');
 }
 
-check(errors.length === 0, '无 JS 报错', errors.slice(0, 2).join(' | '));
+// 假 key 请求必然让控制台出现 401，这是预期的，不算页面错误
+const realErrors = errors.filter((e) => !/401|403/.test(e));
+check(realErrors.length === 0, '除预期的鉴权错误外无 JS 报错', realErrors.slice(0, 2).join(' | '));
 
 await browser.close();
 console.log('\n结果: ' + pass + ' 通过 / ' + fail + ' 失败');

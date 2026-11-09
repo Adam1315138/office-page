@@ -228,9 +228,30 @@
     return { results: [], provider: 'none', tried, errors };
   }
 
+  /** 本地地址判断 */
+  function isLoopback(base) {
+    try {
+      const u = new URL(base);
+      return u.hostname === 'localhost' || u.hostname === '127.0.0.1' || u.hostname === '[::1]';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /**
+   * 托管在公网（https）时，浏览器会直接拒绝访问 http://localhost
+   * （Private Network Access 策略），连试都不必试，否则控制台一片红。
+   */
+  function canReach(base) {
+    if (!base) return false;
+    const hosted = location.protocol === 'https:';
+    if (hosted && isLoopback(base)) return false;
+    return true;
+  }
+
   /**
    * 检索入口：先问本地服务（它能用免费源），服务不可用就浏览器直连。
-   * 页面托管在 GitHub Pages 时，本地服务本来就不存在，直接走直连。
+   * 页面托管在 GitHub Pages / Cloudflare Pages 时，本地服务本来就不存在，直接走直连。
    */
   async function search(query, searchBase, opts) {
     const o = opts || {};
@@ -239,7 +260,7 @@
 
     // 1. 本地服务
     const base = String(searchBase || '').replace(/\/+$/, '');
-    if (base) {
+    if (canReach(base)) {
       const headers = {};
       if (o.provider && o.provider !== 'auto') headers['X-Search-Provider'] = o.provider;
       if (o.key) headers['X-Search-Key'] = o.key;
@@ -270,6 +291,7 @@
   /** 拉取服务端支持的搜索源列表（服务没起时返回 null，界面用内置兜底） */
   async function listProviders(searchBase) {
     const base = String(searchBase || 'http://localhost:3000').replace(/\/+$/, '');
+    if (!canReach(base)) return null; // 公网托管时不去戳 localhost
     try {
       const res = await fetch(base + '/api/search-providers', {
         signal: AbortSignal.timeout ? AbortSignal.timeout(5000) : undefined
@@ -282,9 +304,12 @@
     }
   }
 
-  /** 探测各搜索源连通性（服务端并发发最小请求） */
+  /** 探测各搜索源连通性（服务端并发发最小请求）；公网托管时没有服务端，直接告知 */
   async function checkProviders(searchBase) {
     const base = String(searchBase || 'http://localhost:3000').replace(/\/+$/, '');
+    if (!canReach(base)) {
+      throw new Error('当前是公网托管版本，没有本地服务可探测。搜索会由浏览器直连 Tavily / Serper / Exa，连通性取决于你填的 Key。');
+    }
     const res = await fetch(base + '/api/check-providers', {
       signal: AbortSignal.timeout ? AbortSignal.timeout(45000) : undefined
     });
